@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"time"
 
 	"github.com/auth-core/cmd/conf"
 	"github.com/gin-gonic/gin"
@@ -25,5 +30,26 @@ func main() {
 		Addr:    a.Port,
 		Handler: r,
 	}
-	s.ListenAndServe()
+
+	var wg sync.WaitGroup
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	wg.Add(1)
+	go func(ctx context.Context) {
+		defer wg.Done()
+		<-ctx.Done()
+
+		c, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+
+		if err := s.Shutdown(c); err != nil {
+			log.Printf("Server shutdown error: %v", err)
+			return
+		}
+	}(ctx)
+
+	log.Println(s.ListenAndServe())
+	wg.Wait()
 }
