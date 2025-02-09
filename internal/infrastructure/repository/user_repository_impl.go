@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/auth-core/internal/domain/user"
+	"github.com/auth-core/internal/infrastructure/mapper"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -53,6 +53,10 @@ func (u *UserRepositoryImpl) FindByUserId(ctx context.Context, userId user.UserI
 		return nil, err
 	}
 
-	fmt.Println(response)
-	return nil, nil
+	mapper := mapper.UserMapper{}
+	user, err := mapper.MapToDomain(response)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
