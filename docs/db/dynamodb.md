@@ -4,7 +4,8 @@
 
 | 論理名         | 物理名     | データ型 | キー | GSI     | NULL 許可 | 説明                     |
 | -------------- | ---------- | -------- | ---- | ------- | --------- | ------------------------ |
-| ユーザー ID    | user_id    | string   | PK   | -       | NO        | Cognito Sub を使用       |
+| ユーザー ID    | user_id    | string   | PK   | -       | NO        | usr_550e8400-e29b-41d4-a716-446655440000       |
+| Cognito Sub | cognito_sub      | string   | -    |  | NO        | CognitoのSub |
 | メールアドレス | email      | string   | -    | GSI1-PK | NO        | ユーザーのメールアドレス |
 | 名前           | name       | string   | -    | -       | NO        | ユーザーの表示名         |
 | ユーザータイプ | user_type  | string   | -    | -       | NO        | ユーザー種別             |

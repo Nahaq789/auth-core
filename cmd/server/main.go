@@ -50,6 +50,6 @@ func main() {
 		}
 	}(ctx)
 
-	log.Println(s.ListenAndServe())
+	s.ListenAndServe()
 	wg.Wait()
 }
