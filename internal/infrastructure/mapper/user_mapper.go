@@ -62,7 +62,7 @@ func generateUser(idAttr string, subAttr string, emailAttr string, userTypeAttr 
 		return nil, fmt.Errorf("failed to parsee updated_at: %w", err)
 	}
 
-	return user.NewUser(userId, sub, email, &userType, &createdAt, &updatedAt), nil
+	return user.NewUser(*userId, *sub, *email, userType, createdAt, updatedAt), nil
 }
 
 func getStringValue(item map[string]types.AttributeValue, key string) (string, error) {
