@@ -1,5 +1,5 @@
 package conf
 
 type AwsSetting struct {
-	Region string `env:REGION`
+	Region string `env:"REGION"`
 }
