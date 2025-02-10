@@ -1,11 +1,15 @@
 package user
 
-import "time"
+import (
+	"time"
+
+	valueObjects "github.com/auth-core/internal/domain/value_objects"
+)
 
 type User struct {
 	userId    UserId
 	sub       Sub
-	email     Email
+	email     valueObjects.Email
 	userType  UserType
 	createdAt time.Time
 	updatedAt time.Time
@@ -19,7 +23,7 @@ func (u User) Sub() Sub {
 	return u.sub
 }
 
-func (u User) Email() Email {
+func (u User) Email() valueObjects.Email {
 	return u.email
 }
 
@@ -35,7 +39,7 @@ func (u User) UpdatedAt() time.Time {
 	return u.updatedAt
 }
 
-func NewUser(userId UserId, sub Sub, email Email, userType UserType, createdAt time.Time, updatedAt time.Time) *User {
+func NewUser(userId UserId, sub Sub, email valueObjects.Email, userType UserType, createdAt time.Time, updatedAt time.Time) *User {
 	return &User{
 		userId:    userId,
 		sub:       sub,

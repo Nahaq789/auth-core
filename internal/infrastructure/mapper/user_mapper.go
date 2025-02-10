@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	vo "github.com/auth-core/internal/domain/value_objects"
+
 	"github.com/auth-core/internal/domain/user"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -48,7 +50,7 @@ func generateUser(idAttr string, subAttr string, emailAttr string, userTypeAttr 
 		return nil, fmt.Errorf("failed to parse user_id: %w", err)
 	}
 	sub := user.NewSub(subAttr)
-	email, err := user.NewEmail(emailAttr)
+	email, err := vo.NewEmail(emailAttr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parsee email: %w", err)
 	}
