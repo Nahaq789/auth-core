@@ -13,8 +13,7 @@ import (
 func Load() (*AppSetting, error) {
 	conf := &AppSetting{}
 	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
-		log.Println("load lambda env")
-		if err := env.Parse(&conf); err != nil {
+		if err := env.Parse(conf); err != nil {
 			log.Fatal(err)
 		}
 	} else {

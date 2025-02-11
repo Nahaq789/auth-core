@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
+	"syscall"
 	"time"
 
 	"github.com/auth-core/cmd/conf"
@@ -27,29 +27,26 @@ func main() {
 	})
 
 	s := &http.Server{
-		Addr:    a.Port,
+		Addr:    ":" + a.Port,
 		Handler: r,
 	}
 
-	var wg sync.WaitGroup
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
-
-	wg.Add(1)
-	go func(ctx context.Context) {
-		defer wg.Done()
-		<-ctx.Done()
-
-		c, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		defer cancel()
-
-		if err := s.Shutdown(c); err != nil {
-			log.Printf("Server shutdown error: %v", err)
-			return
+	log.Println("Server is running on port", a.Port)
+	go func() {
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
 		}
-	}(ctx)
+	}()
 
-	s.ListenAndServe()
-	wg.Wait()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s.Shutdown(ctx); err != nil {
+		log.Fatal("Server shutdown:", err)
+	}
+
+	<-ctx.Done()
 }
