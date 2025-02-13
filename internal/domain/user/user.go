@@ -1,10 +1,13 @@
 package user
 
 import (
+	"fmt"
 	"time"
 
 	valueObjects "github.com/auth-core/internal/domain/value_objects"
 )
+
+const layout = "2006-01-02 15:04:05"
 
 type User struct {
 	userId    UserId
@@ -48,4 +51,12 @@ func NewUser(userId UserId, sub Sub, email valueObjects.Email, userType UserType
 		createdAt: createdAt,
 		updatedAt: updatedAt,
 	}
+}
+
+func ParseTime(t string) (*time.Time, error) {
+	time, err := time.Parse(layout, t)
+	if err != nil {
+		return nil, fmt.Errorf("can not parse time %s", t)
+	}
+	return &time, nil
 }
