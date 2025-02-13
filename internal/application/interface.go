@@ -3,10 +3,11 @@ package application
 import (
 	"context"
 
+	"github.com/auth-core/internal/application/dto"
 	"github.com/auth-core/internal/domain/user"
 )
 
 type UserService interface {
-	Create(ctx context.Context, user *user.User) error
-	FindByUserId(ctx context.Context, userId user.UserId) (*user.User, error)
+	Create(ctx context.Context, user *dto.UserDto) error
+	FindByUserId(ctx context.Context, userId string) (*user.User, error)
 }
