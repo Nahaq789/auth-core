@@ -3,12 +3,12 @@ package dto
 import "time"
 
 type UserDto struct {
-	userId    string
-	sub       string
-	email     string
-	userType  string
-	createdAt time.Time
-	updatedAt time.Time
+	userId    string    `json:"user_id" binding:"required"`
+	sub       string    `json:"sub" binding:"required"`
+	email     string    `json:"email" binding:"required"`
+	userType  string    `json:"user_type" binding:"required"`
+	createdAt time.Time `json:"created_at" binding:"required"`
+	updatedAt time.Time `json:"updated_at" binding:"required"`
 }
 
 func (u UserDto) UserId() string {
