@@ -14,20 +14,23 @@ import (
 )
 
 func main() {
-	a, err := conf.Load()
+	a, err := conf.LoadAppSetting()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	r := gin.Default()
-	Routing(r)
+	err = Routing(r, a)
+	if err != nil {
+		log.Fatal("routing error: %", err)
+	}
 
 	s := &http.Server{
-		Addr:    ":" + a.Port,
+		Addr:    ":" + a.Server.Port,
 		Handler: r,
 	}
 
-	log.Println("Server is running on port", a.Port)
+	log.Println("Server is running on port", a.Server.Port)
 	go func() {
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
