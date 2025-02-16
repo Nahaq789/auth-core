@@ -15,6 +15,10 @@ type UserRepositoryImpl struct {
 	tableName      string
 }
 
+func NewUserRepositoryImpl(client *dynamodb.Client, tableName string) *UserRepositoryImpl {
+	return &UserRepositoryImpl{DynamoDBClient: client, tableName: tableName}
+}
+
 func (u *UserRepositoryImpl) Create(ctx context.Context, user *user.User) error {
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String(u.tableName),

@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.1
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.40.0
 	github.com/gin-gonic/gin v1.10.0
+	github.com/google/wire v0.6.0
 )
 
 require (
@@ -14,7 +15,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.10.13 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
-	github.com/google/wire v0.6.0 // indirect
 )
 
 require (

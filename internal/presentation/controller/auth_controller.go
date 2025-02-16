@@ -12,15 +12,19 @@ type AuthController struct {
 	service application.UserService
 }
 
-func (a *AuthController) signup(c *gin.Context) {
-	user := dto.UserDto{}
+func NewAuthController(s application.UserService) *AuthController {
+	return &AuthController{service: s}
+}
+
+func (a *AuthController) Signup(c *gin.Context) {
+	var user dto.UserDto
 	if err := c.ShouldBind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 	}
 
-	if err := a.service.Create(c, &user); err != nil {
+	if err := a.service.CreateUser(c, &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

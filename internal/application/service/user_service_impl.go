@@ -13,24 +13,24 @@ type UserServiceImpl struct {
 	repository repository.UserRepository
 }
 
-func NewUserService(repository repository.UserRepository) UserServiceImpl {
-	return UserServiceImpl{repository: repository}
+func NewUserService(repository repository.UserRepository) *UserServiceImpl {
+	return &UserServiceImpl{repository: repository}
 }
 
 func (u *UserServiceImpl) CreateUser(ctx context.Context, d *dto.UserDto) error {
-	userId, err := user.UserIdFromStr(d.UserId())
+	userId, err := user.UserIdFromStr(d.UserId)
 	if err != nil {
 		return err
 	}
-	sub := user.NewSub(d.Sub())
-	email, err := valueObjects.NewEmail(d.Email())
+	sub := user.NewSub(d.Sub)
+	email, err := valueObjects.NewEmail(d.Email)
 	if err != nil {
 		return err
 	}
-	userType := user.NewUserType(d.UserType())
+	userType := user.NewUserType(d.UserType)
 
 	user := user.NewUser(
-		*userId, *sub, *email, userType, d.CreatedAt(), d.UpdatedAt())
+		*userId, *sub, *email, userType, d.CreatedAt, d.UpdatedAt)
 
 	err = u.repository.Create(ctx, user)
 	if err != nil {

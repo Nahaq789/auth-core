@@ -8,6 +8,6 @@ import (
 )
 
 type UserService interface {
-	Create(ctx context.Context, user *dto.UserDto) error
+	CreateUser(ctx context.Context, d *dto.UserDto) error
 	FindByUserId(ctx context.Context, userId string) (*user.User, error)
 }
