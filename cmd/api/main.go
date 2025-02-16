@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/auth-core/cmd/conf"
-	"github.com/auth-core/internal/presentation"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +20,7 @@ func main() {
 	}
 
 	r := gin.Default()
-	presentation.CreateRoot(r)
+	Routing(r)
 
 	s := &http.Server{
 		Addr:    ":" + a.Port,
