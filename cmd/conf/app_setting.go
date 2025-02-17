@@ -6,7 +6,8 @@ type AppSetting struct {
 }
 
 type AwsSetting struct {
-	Region string `env:"REGION"`
+	Region    string `env:"REGION"`
+	UserTable string `env:"USER_TABLE"`
 }
 
 type ServerSetting struct {
