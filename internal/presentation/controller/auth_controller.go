@@ -29,4 +29,9 @@ func (a *AuthController) Signup(c *gin.Context) {
 			"error": err.Error(),
 		})
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"message": "user created",
+	})
 }
