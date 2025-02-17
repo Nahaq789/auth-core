@@ -10,10 +10,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Load() (*AppSetting, error) {
-	conf := &AppSetting{}
+func LoadAppSetting() (*AppSetting, error) {
+	server := &ServerSetting{}
+	aws := &AwsSetting{}
 	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
-		if err := env.Parse(conf); err != nil {
+		if err := env.Parse(server); err != nil {
+			log.Fatal(err)
+		}
+		if err := env.Parse(aws); err != nil {
 			log.Fatal(err)
 		}
 	} else {
@@ -22,11 +26,17 @@ func Load() (*AppSetting, error) {
 		if err := godotenv.Load(filepath.Join(rootPath, ".env")); err != nil {
 			log.Fatal(err)
 		}
-
-		if err := env.Parse(conf); err != nil {
+		if err := env.Parse(server); err != nil {
+			log.Fatal(err)
+		}
+		if err := env.Parse(aws); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	return conf, nil
+	app := AppSetting{
+		Aws:    *aws,
+		Server: *server,
+	}
+	return &app, nil
 }
