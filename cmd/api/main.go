@@ -60,7 +60,7 @@ func Routing(r gin.IRouter, settng *conf.AppSetting) error {
 		return fmt.Errorf("%s", err)
 	}
 
-	cr := di.Initialize(client)
+	cr := di.Initialize(client, &settng.Aws)
 	{
 		v1.POST("/signup", cr.AuthController.Signup)
 	}
