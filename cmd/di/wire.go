@@ -4,6 +4,7 @@
 package di
 
 import (
+	"github.com/auth-core/cmd/conf"
 	"github.com/auth-core/internal/application"
 	services "github.com/auth-core/internal/application/service"
 	domainRepos "github.com/auth-core/internal/domain/repository"
@@ -13,11 +14,16 @@ import (
 	"github.com/google/wire"
 )
 
+func ProvideUserRepository(client *dynamodb.Client, aws *conf.AwsSetting) *repository.UserRepositoryImpl {
+	repository := repository.NewUserRepositoryImpl(client, aws.UserTable)
+	return repository
+}
+
 var awsSet = wire.NewSet(dynamodb.New)
+
 var repositorySet = wire.NewSet(
-	repository.NewUserRepositoryImpl,
+	ProvideUserRepository,
 	wire.Bind(new(domainRepos.UserRepository), new(*repository.UserRepositoryImpl)),
-	wire.Value("hoge"),
 )
 var serviceSet = wire.NewSet(
 	services.NewUserService,
@@ -29,7 +35,7 @@ type ControllerSet struct {
 	AuthController *controller.AuthController
 }
 
-func Initialize(client *dynamodb.Client) *ControllerSet {
+func Initialize(client *dynamodb.Client, aws *conf.AwsSetting) *ControllerSet {
 	wire.Build(
 		repositorySet,
 		serviceSet,

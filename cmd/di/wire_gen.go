@@ -7,6 +7,7 @@
 package di
 
 import (
+	"github.com/auth-core/cmd/conf"
 	"github.com/auth-core/internal/application"
 	"github.com/auth-core/internal/application/service"
 	repository2 "github.com/auth-core/internal/domain/repository"
@@ -18,9 +19,8 @@ import (
 
 // Injectors from wire.go:
 
-func Initialize(client *dynamodb.Client) *ControllerSet {
-	string2 := _wireStringValue
-	userRepositoryImpl := repository.NewUserRepositoryImpl(client, string2)
+func Initialize(client *dynamodb.Client, aws *conf.AwsSetting) *ControllerSet {
+	userRepositoryImpl := ProvideUserRepository(client, aws)
 	userServiceImpl := services.NewUserService(userRepositoryImpl)
 	authController := controller.NewAuthController(userServiceImpl)
 	diControllerSet := &ControllerSet{
@@ -29,15 +29,18 @@ func Initialize(client *dynamodb.Client) *ControllerSet {
 	return diControllerSet
 }
 
-var (
-	_wireStringValue = "hoge"
-)
-
 // wire.go:
+
+func ProvideUserRepository(client *dynamodb.Client, aws *conf.AwsSetting) *repository.UserRepositoryImpl {
+	repository2 := repository.NewUserRepositoryImpl(client, aws.UserTable)
+	return repository2
+}
 
 var awsSet = wire.NewSet(dynamodb.New)
 
-var repositorySet = wire.NewSet(repository.NewUserRepositoryImpl, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepositoryImpl)), wire.Value("hoge"))
+var repositorySet = wire.NewSet(
+	ProvideUserRepository, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepositoryImpl)),
+)
 
 var serviceSet = wire.NewSet(services.NewUserService, wire.Bind(new(application.UserService), new(*services.UserServiceImpl)))
 
