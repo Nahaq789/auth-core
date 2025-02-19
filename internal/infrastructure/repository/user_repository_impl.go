@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"time"
 
 	"github.com/auth-core/internal/domain/user"
 	"github.com/auth-core/internal/infrastructure/mapper"
@@ -20,6 +23,9 @@ func NewUserRepositoryImpl(client *dynamodb.Client, tableName string) *UserRepos
 }
 
 func (u *UserRepositoryImpl) Create(ctx context.Context, user *user.User) error {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String(u.tableName),
 		Item: map[string]types.AttributeValue{
@@ -40,6 +46,9 @@ func (u *UserRepositoryImpl) Create(ctx context.Context, user *user.User) error 
 
 	_, err := u.DynamoDBClient.PutItem(ctx, input)
 	if err != nil {
+		if ctxErr := ctx.Err(); ctxErr == context.DeadlineExceeded {
+			return fmt.Errorf("user create timeout: %s", ctxErr)
+		}
 		return err
 	}
 	return nil

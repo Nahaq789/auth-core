@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/auth-core/internal/application"
@@ -22,12 +23,20 @@ func (a *AuthController) Signup(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
-	if err := a.service.CreateUser(c, &user); err != nil {
+	ch := make(chan error, 1)
+	go func(ch chan error, ctx context.Context) {
+		ch <- a.service.CreateUser(ctx, &user)
+	}(ch, context.Background())
+
+	err := <-ch
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
