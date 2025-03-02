@@ -17,6 +17,8 @@ type UserRepositoryImpl struct {
 	tableName      string
 }
 
+const layout string = "2006-01-02 15:04:05"
+
 func NewUserRepositoryImpl(client *dynamodb.Client, tableName string) *UserRepositoryImpl {
 	return &UserRepositoryImpl{DynamoDBClient: client, tableName: tableName}
 }
@@ -35,10 +37,10 @@ func (u *UserRepositoryImpl) Create(ctx context.Context, user *user.User) error 
 				Value: user.UserType().String(),
 			},
 			"created_at": &types.AttributeValueMemberS{
-				Value: user.CreatedAt().Format("2006-01-02 15:04:05"),
+				Value: user.CreatedAt().Format(layout),
 			},
 			"updated_at": &types.AttributeValueMemberS{
-				Value: user.UpdatedAt().Format("2006-01-02 15:04:05"),
+				Value: user.UpdatedAt().Format(layout),
 			},
 		},
 	}
