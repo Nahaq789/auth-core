@@ -12,6 +12,7 @@ import (
 
 	"github.com/auth-core/cmd/conf"
 	"github.com/auth-core/cmd/di"
+	"github.com/auth-core/internal/presentation/middleware"
 	"github.com/auth-core/pkg/db"
 	"github.com/gin-gonic/gin"
 )
@@ -55,6 +56,7 @@ func main() {
 
 func Routing(r gin.IRouter, settng *conf.AppSetting) error {
 	v1 := r.Group("/api/v1")
+	v1.Use(middleware.LoggingMiddleware())
 	client, err := db.NewDynamoDbClient(context.Background(), settng.Aws.Region)
 	if err != nil {
 		return fmt.Errorf("%s", err)
