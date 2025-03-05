@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -54,18 +55,29 @@ func main() {
 	<-ctx.Done()
 }
 
-func Routing(r gin.IRouter, settng *conf.AppSetting) error {
+func Routing(r gin.IRouter, setting *conf.AppSetting) error {
 	v1 := r.Group("/api/v1")
-	v1.Use(middleware.LoggingMiddleware())
-	client, err := db.NewDynamoDbClient(context.Background(), settng.Aws.Region)
+
+	lc := initLogger(setting.Server.Level)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	v1.Use(middleware.LoggingMiddleware(logger, lc))
+	client, err := db.NewDynamoDbClient(context.Background(), setting.Aws.Region)
 	if err != nil {
 		return fmt.Errorf("%s", err)
 	}
 
-	cr := di.Initialize(client, &settng.Aws)
+	cr := di.Initialize(client, &setting.Aws)
 	{
 		v1.POST("/signup", cr.AuthController.Signup)
 	}
 
 	return nil
+}
+
+func initLogger(level string) *middleware.LoggerConfig {
+	lv := middleware.ConvertLevel(level)
+	lc := middleware.NewLoggerConfig(
+		middleware.WithBaseLogLevel(lv),
+	)
+	return lc
 }

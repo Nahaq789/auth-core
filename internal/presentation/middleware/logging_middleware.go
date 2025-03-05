@@ -12,7 +12,45 @@ var (
 	timeformat         = "2006/1/2 15:04:05.000 JTS"
 )
 
-func LoggingMiddleware(logger *slog.Logger) gin.HandlerFunc {
+type LoggerConfig struct {
+	BaseLogLevel slog.Level
+}
+
+type Option func(*LoggerConfig)
+
+func NewLoggerConfig(opts ...Option) *LoggerConfig {
+	lc := &LoggerConfig{}
+
+	for _, opt := range opts {
+		opt(lc)
+	}
+
+	return lc
+}
+
+func WithBaseLogLevel(level slog.Level) Option {
+	return func(c *LoggerConfig) {
+		c.BaseLogLevel = level
+	}
+}
+
+func ConvertLevel(level string) slog.Level {
+	if level == "INFO" {
+		return slog.LevelInfo
+	}
+	if level == "DEBUG" {
+		return slog.LevelDebug
+	}
+	if level == "WARN" {
+		return slog.LevelWarn
+	}
+	if level == "ERROR" {
+		return slog.LevelError
+	}
+	return slog.LevelInfo
+}
+
+func LoggingMiddleware(logger *slog.Logger, config *LoggerConfig) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		jst, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
@@ -46,7 +84,7 @@ func LoggingMiddleware(logger *slog.Logger) gin.HandlerFunc {
 
 		loggerWithRequestID.LogAttrs(
 			ctx.Request.Context(),
-			slog.LevelInfo,
+			config.BaseLogLevel,
 			"Request Log",
 			requestAttr...,
 		)
@@ -58,6 +96,20 @@ func LoggingMiddleware(logger *slog.Logger) gin.HandlerFunc {
 		latency := end.Sub(start)
 		status := ctx.Writer.Status()
 
+		logLevel := determineLogLevel(status)
+
+		responseAttr := []slog.Attr{
+			slog.String("Time", endStr),
+			slog.String("Latency", convertLatency(latency)),
+			slog.Int("Status", status),
+		}
+
+		loggerWithRequestID.LogAttrs(
+			ctx.Request.Context(),
+			logLevel,
+			"Response Log",
+			responseAttr...,
+		)
 	}
 }
 
@@ -66,4 +118,8 @@ func determineLogLevel(status int) slog.Level {
 		return slog.LevelInfo
 	}
 	return slog.LevelError
+}
+
+func convertLatency(latency time.Duration) string {
+	return latency.String()
 }

@@ -11,5 +11,6 @@ type AwsSetting struct {
 }
 
 type ServerSetting struct {
-	Port string `env:"PORT"`
+	Port  string `env:"PORT"`
+	Level string `enc:"LEVEL"`
 }
