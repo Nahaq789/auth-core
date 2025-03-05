@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "main" {
-  name = "my-user-pool"
+  name = "auth-core-pool"
 
   # パスワードポリシー
   password_policy {
