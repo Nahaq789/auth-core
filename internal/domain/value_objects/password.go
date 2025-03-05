@@ -1,9 +1,17 @@
 package valueObjects
 
-type Pasawoed struct {
+type Password struct {
 	value string
 }
 
-func NewPassword(value string) *Pasawoed {
-	return &Pasawoed{value: value}
+func (p Password) Value() string {
+	return p.value
+}
+
+func (p Password) String() string {
+	return p.value
+}
+
+func NewPassword(value string) *Password {
+	return &Password{value: value}
 }
