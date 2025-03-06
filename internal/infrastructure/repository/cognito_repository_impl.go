@@ -16,6 +16,13 @@ type CognitoRepositoryImpl struct {
 	clientId      string
 }
 
+func NewCognitoRepository(client *cognitoidentityprovider.Client, clientId string) *CognitoRepositoryImpl {
+	return &CognitoRepositoryImpl{
+		CognitoClient: client,
+		clientId:      clientId,
+	}
+}
+
 func (actor *CognitoRepositoryImpl) SignUp(ctx context.Context, auth *auth.Auth) (bool, error) {
 	output, err := actor.CognitoClient.SignUp(ctx, &cognitoidentityprovider.SignUpInput{
 		ClientId: aws.String(actor.clientId),

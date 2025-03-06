@@ -10,6 +10,7 @@ import (
 	domainRepos "github.com/auth-core/internal/domain/repository"
 	"github.com/auth-core/internal/infrastructure/repository"
 	"github.com/auth-core/internal/presentation/controller"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/google/wire"
 )
@@ -19,12 +20,22 @@ func ProvideUserRepository(client *dynamodb.Client, aws *conf.AwsSetting) *repos
 	return repository
 }
 
+func ProvideCognitoRepository(client *cognitoidentityprovider.Client, clientId string) *repository.CognitoRepositoryImpl {
+	repository := repository.NewCognitoRepository(client, clientId)
+	return repository
+}
+
 var awsSet = wire.NewSet(dynamodb.New)
 
 var repositorySet = wire.NewSet(
 	ProvideUserRepository,
 	wire.Bind(new(domainRepos.UserRepository), new(*repository.UserRepositoryImpl)),
 )
+var CognitoSet = wire.NewSet(
+	ProvideCognitoRepository,
+	wire.Bind(new(domainRepos.CognitoRepository), new(*repository.CognitoRepositoryImpl)),
+)
+
 var serviceSet = wire.NewSet(
 	services.NewUserService,
 	wire.Bind(new(application.UserService), new(*services.UserServiceImpl)),

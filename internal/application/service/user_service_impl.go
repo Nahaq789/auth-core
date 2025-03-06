@@ -11,10 +11,11 @@ import (
 
 type UserServiceImpl struct {
 	repository repository.UserRepository
+	cognito    repository.CognitoRepository
 }
 
-func NewUserService(repository repository.UserRepository) *UserServiceImpl {
-	return &UserServiceImpl{repository: repository}
+func NewUserService(repository repository.UserRepository, cognito repository.CognitoRepository) *UserServiceImpl {
+	return &UserServiceImpl{repository: repository, cognito: cognito}
 }
 
 func (u *UserServiceImpl) CreateUser(ctx context.Context, d *dto.UserDto) error {
