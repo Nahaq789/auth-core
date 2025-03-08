@@ -20,8 +20,8 @@ func ProvideUserRepository(client *dynamodb.Client, aws *conf.AwsSetting) *repos
 	return repository
 }
 
-func ProvideCognitoRepository(client *cognitoidentityprovider.Client, clientId string) *repository.CognitoRepositoryImpl {
-	repository := repository.NewCognitoRepository(client, clientId)
+func ProvideCognitoRepository(client *cognitoidentityprovider.Client, aws *conf.AwsSetting) *repository.CognitoRepositoryImpl {
+	repository := repository.NewCognitoRepository(client, aws.CognitoClientId)
 	return repository
 }
 
@@ -46,9 +46,10 @@ type ControllerSet struct {
 	AuthController *controller.AuthController
 }
 
-func Initialize(client *dynamodb.Client, aws *conf.AwsSetting) *ControllerSet {
+func Initialize(dynamodb *dynamodb.Client, cognito *cognitoidentityprovider.Client, aws *conf.AwsSetting) *ControllerSet {
 	wire.Build(
 		repositorySet,
+		CognitoSet,
 		serviceSet,
 		controllerSet,
 		wire.Struct(new(ControllerSet), "*"),

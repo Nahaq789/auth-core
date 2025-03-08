@@ -13,15 +13,17 @@ import (
 	repository2 "github.com/auth-core/internal/domain/repository"
 	"github.com/auth-core/internal/infrastructure/repository"
 	"github.com/auth-core/internal/presentation/controller"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/google/wire"
 )
 
 // Injectors from wire.go:
 
-func Initialize(client *dynamodb.Client, aws *conf.AwsSetting) *ControllerSet {
-	userRepositoryImpl := ProvideUserRepository(client, aws)
-	userServiceImpl := services.NewUserService(userRepositoryImpl)
+func Initialize(dynamodb2 *dynamodb.Client, cognito *cognitoidentityprovider.Client, aws *conf.AwsSetting) *ControllerSet {
+	userRepositoryImpl := ProvideUserRepository(dynamodb2, aws)
+	cognitoRepositoryImpl := ProvideCognitoRepository(cognito, aws)
+	userServiceImpl := services.NewUserService(userRepositoryImpl, cognitoRepositoryImpl)
 	authController := controller.NewAuthController(userServiceImpl)
 	diControllerSet := &ControllerSet{
 		AuthController: authController,
@@ -36,10 +38,19 @@ func ProvideUserRepository(client *dynamodb.Client, aws *conf.AwsSetting) *repos
 	return repository2
 }
 
+func ProvideCognitoRepository(client *cognitoidentityprovider.Client, aws *conf.AwsSetting) *repository.CognitoRepositoryImpl {
+	repository2 := repository.NewCognitoRepository(client, aws.CognitoClientId)
+	return repository2
+}
+
 var awsSet = wire.NewSet(dynamodb.New)
 
 var repositorySet = wire.NewSet(
 	ProvideUserRepository, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepositoryImpl)),
+)
+
+var CognitoSet = wire.NewSet(
+	ProvideCognitoRepository, wire.Bind(new(repository2.CognitoRepository), new(*repository.CognitoRepositoryImpl)),
 )
 
 var serviceSet = wire.NewSet(services.NewUserService, wire.Bind(new(application.UserService), new(*services.UserServiceImpl)))

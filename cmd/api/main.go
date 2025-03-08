@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -14,7 +13,7 @@ import (
 	"github.com/auth-core/cmd/conf"
 	"github.com/auth-core/cmd/di"
 	"github.com/auth-core/internal/presentation/middleware"
-	"github.com/auth-core/pkg/db"
+	"github.com/auth-core/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,29 +54,17 @@ func main() {
 	<-ctx.Done()
 }
 
-func Routing(r gin.IRouter, setting *conf.AppSetting) error {
+func Routing(ctx context.Context, r gin.IRouter, setting *conf.AppSetting) error {
 	v1 := r.Group("/api/v1")
 
-	lc := initLogger(setting.Server.Level)
+	lc := logger.InitLogger(setting.Server.Level)
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	v1.Use(middleware.LoggingMiddleware(logger, lc))
-	client, err := db.NewDynamoDbClient(context.Background(), setting.Aws.Region)
-	if err != nil {
-		return fmt.Errorf("%s", err)
-	}
 
-	cr := di.Initialize(client, &setting.Aws)
+	cr := di.Initialize(dynamodb, cognit, &setting.Aws)
 	{
 		v1.POST("/signup", cr.AuthController.Signup)
 	}
 
 	return nil
-}
-
-func initLogger(level string) *middleware.LoggerConfig {
-	lv := middleware.ConvertLevel(level)
-	lc := middleware.NewLoggerConfig(
-		middleware.WithBaseLogLevel(lv),
-	)
-	return lc
 }
