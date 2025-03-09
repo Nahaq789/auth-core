@@ -1,4 +1,4 @@
-package db
+package aws
 
 import (
 	"context"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/auth-core/pkg/db"
+	"github.com/auth-core/pkg/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
@@ -26,8 +26,8 @@ type AwsClient struct {
 	Cognito  cognitoidentityprovider.Client
 }
 
-func (a *AwsClient) InitClient(ctx context.Context, aws *AwsSetting) (*AwsClient, error) {
-	dynamodb, err := db.NewDynamoDbClient(ctx, aws.Region)
+func InitClient(ctx context.Context, a *AwsSetting) (*AwsClient, error) {
+	dynamodb, err := aws.NewDynamoDbClient(ctx, a.Region)
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
 	}

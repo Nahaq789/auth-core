@@ -2,11 +2,13 @@ package logger
 
 import (
 	"log/slog"
+	"os"
 	"time"
 )
 
 type LoggerConfig struct {
 	BaseLogLevel slog.Level
+	Logger       slog.Logger
 }
 
 type Option func(*LoggerConfig)
@@ -21,9 +23,16 @@ func NewLoggerConfig(opts ...Option) *LoggerConfig {
 	return lc
 }
 
-func WithBaseLogLevel(level slog.Level) Option {
+func withBaseLogLevel(level slog.Level) Option {
 	return func(c *LoggerConfig) {
 		c.BaseLogLevel = level
+	}
+}
+
+func withSlog() Option {
+	return func(c *LoggerConfig) {
+		log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+		c.Logger = *log
 	}
 }
 
@@ -57,7 +66,8 @@ func ConvertLatency(latency time.Duration) string {
 func InitLogger(level string) *LoggerConfig {
 	lv := ConvertLevel(level)
 	lc := NewLoggerConfig(
-		WithBaseLogLevel(lv),
+		withBaseLogLevel(lv),
+		withSlog(),
 	)
 	return lc
 }

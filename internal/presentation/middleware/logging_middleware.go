@@ -13,11 +13,11 @@ var (
 	timeformat         = "2006/1/2 15:04:05.000 JTS"
 )
 
-func LoggingMiddleware(log *slog.Logger, config *logger.LoggerConfig) gin.HandlerFunc {
+func LoggingMiddleware(config *logger.LoggerConfig) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		jst, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
-			log.Error("Failed to load location for Asia/Tokyo", "error", err)
+			config.Logger.Error("Failed to load location for Asia/Tokyo", "error", err)
 		}
 		start := time.Now().In(jst)
 		startStr := start.Format(timeformat)
@@ -33,7 +33,7 @@ func LoggingMiddleware(log *slog.Logger, config *logger.LoggerConfig) gin.Handle
 			params[p.Key] = p.Value
 		}
 
-		loggerWithRequestID := log.With("RequestID", requestID)
+		loggerWithRequestID := config.Logger.With("RequestID", requestID)
 
 		requestAttr := []slog.Attr{
 			slog.String("Time", startStr),
