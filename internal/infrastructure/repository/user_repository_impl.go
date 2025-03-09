@@ -8,6 +8,7 @@ import (
 	"github.com/auth-core/internal/domain/user"
 	"github.com/auth-core/internal/infrastructure/mapper"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
@@ -73,4 +74,25 @@ func (u *UserRepositoryImpl) FindByUserId(ctx context.Context, userId user.UserI
 		return nil, err
 	}
 	return user, nil
+}
+
+func (u *UserRepositoryImpl) Exist(ctx context.Context, email string) (bool, error) {
+	keyExp := expression.Key("email").Equal(expression.Value(email))
+	expr, err := expression.NewBuilder().WithKeyCondition(keyExp).Build()
+	response, err := u.DynamoDBClient.Query(ctx, &dynamodb.QueryInput{
+		TableName:                 aws.String(u.tableName),
+		IndexName:                 aws.String("email-index"),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+	})
+	if err != nil {
+		return true, err
+	}
+
+	if len(response.Items) > 0 {
+		return true, nil
+	}
+
+	return false, err
 }

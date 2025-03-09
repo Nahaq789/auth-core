@@ -13,9 +13,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/google/wire"
+	"log/slog"
 )
 
-func ProvideUserRepository(client *dynamodb.Client, aws *conf.AwsSetting) *repository.UserRepositoryImpl {
+func ProvideUserRepository(logger *slog.Logger, client *dynamodb.Client, aws *conf.AwsSetting) *repository.UserRepositoryImpl {
 	repository := repository.NewUserRepositoryImpl(client, aws.UserTable)
 	return repository
 }
@@ -46,7 +47,7 @@ type ControllerSet struct {
 	AuthController *controller.AuthController
 }
 
-func Initialize(dynamodb *dynamodb.Client, cognito *cognitoidentityprovider.Client, aws *conf.AwsSetting) *ControllerSet {
+func Initialize(logger *slog.Logger, dynamodb *dynamodb.Client, cognito *cognitoidentityprovider.Client, aws *conf.AwsSetting) *ControllerSet {
 	wire.Build(
 		repositorySet,
 		CognitoSet,

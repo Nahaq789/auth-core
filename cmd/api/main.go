@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("aws client error : %v", err)
 	}
 
-	cr := di.Initialize(&awsClient.Dynamodb, &awsClient.Cognito, &a.Aws)
+	cr := di.Initialize(&logger.Logger, &awsClient.Dynamodb, &awsClient.Cognito, &a.Aws)
 	err = Routing(ctx, r, *cr, *logger)
 	if err != nil {
 		log.Fatal("routing error: %", err)
