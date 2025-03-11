@@ -19,6 +19,13 @@ func NewAuthController(s application.UserService, c application.CognitoService) 
 }
 
 func (a *AuthController) Signup(c *gin.Context) {
+	var auth dto.AuthDto
+	if err := c.ShouldBind(&auth); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	}
+
 	var user dto.UserDto
 	if err := c.ShouldBind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -27,12 +34,14 @@ func (a *AuthController) Signup(c *gin.Context) {
 		return
 	}
 
-	ch := make(chan error, 1)
-	go func(ch chan error, ctx context.Context) {
-		ch <- a.userService.CreateUser(ctx, &user)
-	}(ch, context.Background())
-
-	err := <-ch
+	ctx := context.Background()
+	err := a.cognitoService.SignUp(ctx, &auth)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+	}
+	err = a.userService.CreateUser(context.Background(), &user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

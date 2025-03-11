@@ -8,6 +8,7 @@ import (
 	"github.com/auth-core/internal/application/dto"
 	"github.com/auth-core/internal/domain/auth"
 	"github.com/auth-core/internal/domain/repository"
+	"github.com/auth-core/internal/domain/user"
 	valueObjects "github.com/auth-core/internal/domain/value_objects"
 )
 
@@ -48,6 +49,8 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 		)
 		return err
 	}
+
+	user := user.NewUser()
 
 	c.logger.Info("Complete SignUp user", "email", auth.Email().String())
 	c.logger.Info("Finish Cognito SignUp")

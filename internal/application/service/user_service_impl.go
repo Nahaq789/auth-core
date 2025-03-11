@@ -22,6 +22,7 @@ func NewUserService(logger *slog.Logger, repository repository.UserRepository, c
 }
 
 func (u *UserServiceImpl) CreateUser(ctx context.Context, d *dto.UserDto) error {
+	u.logger.Info("Start Create User", "email", d.Email, "sub", d.Sub)
 	exist, err := u.repository.Exist(ctx, d.Email)
 	if err != nil {
 		u.logger.Error("Failed to check if user exists", "email", d.Email, "error", err)
@@ -48,10 +49,12 @@ func (u *UserServiceImpl) CreateUser(ctx context.Context, d *dto.UserDto) error 
 
 	err = u.repository.Create(ctx, user)
 	if err != nil {
+		u.logger.Error("Failed to create user", "email", user.Email().String())
 		return err
 	}
 
 	u.logger.Info("user created", "email", d.Email)
+	u.logger.Info("Finish Create User")
 	return nil
 }
 
