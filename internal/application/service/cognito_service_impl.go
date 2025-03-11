@@ -17,7 +17,7 @@ type CognitoServiceImpl struct {
 	cognito     repository.CognitoRepository
 }
 
-func NewCognitoServiceImpl(
+func NewCognitoService(
 	logger *slog.Logger,
 	userService application.UserService,
 	cognito repository.CognitoRepository,
