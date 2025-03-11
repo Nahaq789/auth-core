@@ -10,11 +10,12 @@ import (
 )
 
 type AuthController struct {
-	service application.UserService
+	userService    application.UserService
+	cognitoService application.CognitoService
 }
 
-func NewAuthController(s application.UserService) *AuthController {
-	return &AuthController{service: s}
+func NewAuthController(s application.UserService, c application.CognitoService) *AuthController {
+	return &AuthController{userService: s, cognitoService: c}
 }
 
 func (a *AuthController) Signup(c *gin.Context) {
@@ -28,7 +29,7 @@ func (a *AuthController) Signup(c *gin.Context) {
 
 	ch := make(chan error, 1)
 	go func(ch chan error, ctx context.Context) {
-		ch <- a.service.CreateUser(ctx, &user)
+		ch <- a.userService.CreateUser(ctx, &user)
 	}(ch, context.Background())
 
 	err := <-ch

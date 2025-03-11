@@ -25,7 +25,8 @@ func Initialize(logger *slog.Logger, dynamodb2 *dynamodb.Client, cognito *cognit
 	userRepositoryImpl := ProvideUserRepository(logger, dynamodb2, aws)
 	cognitoRepositoryImpl := ProvideCognitoRepository(cognito, aws)
 	userServiceImpl := services.NewUserService(logger, userRepositoryImpl, cognitoRepositoryImpl)
-	authController := controller.NewAuthController(userServiceImpl)
+	cognitoServiceImpl := services.NewCognitoService(logger, userServiceImpl, cognitoRepositoryImpl)
+	authController := controller.NewAuthController(userServiceImpl, cognitoServiceImpl)
 	diControllerSet := &ControllerSet{
 		AuthController: authController,
 	}
@@ -46,15 +47,17 @@ func ProvideCognitoRepository(client *cognitoidentityprovider.Client, aws *conf.
 
 var awsSet = wire.NewSet(dynamodb.New)
 
-var repositorySet = wire.NewSet(
+var userRepositorySet = wire.NewSet(
 	ProvideUserRepository, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepositoryImpl)),
 )
 
-var CognitoSet = wire.NewSet(
+var cognitoRepositorySet = wire.NewSet(
 	ProvideCognitoRepository, wire.Bind(new(repository2.CognitoRepository), new(*repository.CognitoRepositoryImpl)),
 )
 
-var serviceSet = wire.NewSet(services.NewUserService, wire.Bind(new(application.UserService), new(*services.UserServiceImpl)))
+var userServiceSet = wire.NewSet(services.NewUserService, wire.Bind(new(application.UserService), new(*services.UserServiceImpl)))
+
+var cognitoServiceSet = wire.NewSet(services.NewCognitoService, wire.Bind(new(application.CognitoService), new(*services.CognitoServiceImpl)))
 
 var controllerSet = wire.NewSet(controller.NewAuthController)
 
