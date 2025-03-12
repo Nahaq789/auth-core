@@ -3,30 +3,19 @@ package uuid
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
 	"io"
-	"regexp"
 )
 
-type UuidImpl struct{}
+type UuidImpl struct {
+	value string
+}
 
 func (u UuidImpl) NewV4() (string, error) {
 	return NewV4()
 }
 
-func (u UuidImpl) ValidFormat(uuid string) error {
-	pattern := "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return err
-	}
-
-	match := re.MatchString(uuid)
-	if match {
-		return nil
-	}
-	error := errors.New("Invalid UUID format: must be in the format 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'")
-	return error
+func NewUuid(uuid string) *UuidImpl {
+	return &UuidImpl{value: uuid}
 }
 
 type Uuid [16]byte
