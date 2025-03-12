@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/auth-core/internal/domain/models/sub"
 	valueObjects "github.com/auth-core/internal/domain/value_objects"
 )
 
@@ -11,7 +12,7 @@ const layout = "2006-01-02 15:04:05"
 
 type User struct {
 	userId    UserId
-	sub       Sub
+	sub       sub.Sub
 	email     valueObjects.Email
 	userType  UserType
 	createdAt time.Time
@@ -22,7 +23,7 @@ func (u User) UserId() UserId {
 	return u.userId
 }
 
-func (u User) Sub() Sub {
+func (u User) Sub() sub.Sub {
 	return u.sub
 }
 
@@ -42,7 +43,7 @@ func (u User) UpdatedAt() time.Time {
 	return u.updatedAt
 }
 
-func NewUser(userId UserId, sub Sub, email valueObjects.Email, userType UserType, createdAt time.Time, updatedAt time.Time) *User {
+func NewUser(userId UserId, sub sub.Sub, email valueObjects.Email, userType UserType, createdAt time.Time, updatedAt time.Time) *User {
 	return &User{
 		userId:    userId,
 		sub:       sub,
