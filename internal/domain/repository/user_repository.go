@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/auth-core/internal/domain/user"
+	"github.com/auth-core/internal/domain/models/user"
 )
 
 type UserRepository interface {

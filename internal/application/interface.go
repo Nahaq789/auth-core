@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/auth-core/internal/application/dto"
-	"github.com/auth-core/internal/domain/user"
+	"github.com/auth-core/internal/domain/models/user"
 )
 
 type UserService interface {

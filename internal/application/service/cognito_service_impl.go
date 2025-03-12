@@ -3,13 +3,15 @@ package services
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/auth-core/internal/application"
 	"github.com/auth-core/internal/application/dto"
-	"github.com/auth-core/internal/domain/auth"
+	"github.com/auth-core/internal/domain/models/auth"
+	"github.com/auth-core/internal/domain/models/user"
 	"github.com/auth-core/internal/domain/repository"
-	"github.com/auth-core/internal/domain/user"
 	valueObjects "github.com/auth-core/internal/domain/value_objects"
+	"github.com/auth-core/pkg/uuid"
 )
 
 type CognitoServiceImpl struct {
@@ -41,8 +43,8 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 		*password,
 	)
 
-	flg, err := c.cognito.SignUp(ctx, auth)
-	if err != nil || !flg {
+	result, err := c.cognito.SignUp(ctx, auth)
+	if err != nil {
 		c.logger.Error("Failed Signup user",
 			"email", auth.Email().String(),
 			"error", err,
@@ -50,7 +52,21 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 		return err
 	}
 
-	user := user.NewUser()
+	var uuidImpl uuid.UuidImpl
+	u, err := uuidImpl.NewV4()
+	if err != nil {
+		c.logger.Error("Failed generate uuid", "error", err)
+		return err
+	}
+	userId, err := user.NewUserId(uuid.NewUuid(u))
+	if err != nil {
+		c.logger.Error("Failed generate userId", "error", err)
+		return err
+	}
+
+	userType := user.NewUserType("standard")
+	time := time.Now()
+	user := user.NewUser(*userId, *result.Sub, *email, userType, time, time)
 
 	c.logger.Info("Complete SignUp user", "email", auth.Email().String())
 	c.logger.Info("Finish Cognito SignUp")

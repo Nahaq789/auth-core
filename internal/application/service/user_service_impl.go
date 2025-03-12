@@ -6,8 +6,9 @@ import (
 	"log/slog"
 
 	"github.com/auth-core/internal/application/dto"
+	"github.com/auth-core/internal/domain/models/sub"
+	"github.com/auth-core/internal/domain/models/user"
 	"github.com/auth-core/internal/domain/repository"
-	"github.com/auth-core/internal/domain/user"
 	valueObjects "github.com/auth-core/internal/domain/value_objects"
 )
 
@@ -37,7 +38,12 @@ func (u *UserServiceImpl) CreateUser(ctx context.Context, d *dto.UserDto) error 
 	if err != nil {
 		return err
 	}
-	sub := user.NewSub(d.Sub)
+	sub, err := sub.NewSub(d.Sub)
+	if err != nil {
+		u.logger.Error("Failed to create sub",
+			"sub", d.Sub,
+			"error", err)
+	}
 	email, err := valueObjects.NewEmail(d.Email)
 	if err != nil {
 		return err
