@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/auth-core/internal/domain/user"
+	"github.com/auth-core/internal/domain/models/user"
 	"github.com/auth-core/internal/infrastructure/mapper"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
