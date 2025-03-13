@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -33,8 +34,8 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 
 	email, err := valueObjects.NewEmail(d.Email)
 	if err != nil {
-		c.logger.Error("Faild email", "email", d.Email, "error", err)
-		return err
+		c.logger.Error("Failed email validation", "email", d.Email, "error", err)
+		return fmt.Errorf("invalid email format %q: %w", d.Email, err)
 	}
 	password := valueObjects.NewPassword(d.Password)
 
@@ -45,25 +46,27 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 
 	result, err := c.cognito.SignUp(ctx, auth)
 	if err != nil {
-		c.logger.Error("Failed Signup user",
+		c.logger.Error("Failed Cognito SignUp",
 			"email", auth.Email().String(),
 			"error", err,
 		)
-		return err
+		return fmt.Errorf("cognito signup failed for email %q: %w", auth.Email().String(), err)
 	}
 
 	var uuidImpl uuid.UuidImpl
 	userId, err := user.NewUserId(uuidImpl)
 	if err != nil {
-		c.logger.Error("Failed generate userId", "error", err)
-		return err
+		c.logger.Error("Failed to generate userId", "error", err)
+		return fmt.Errorf("failed to generate user ID: %w", err)
 	}
 
 	userType := user.NewUserType("standard")
 	time := time.Now()
 	user := user.NewUser(*userId, *result.Sub, *email, userType, time, time)
 
-	c.logger.Info("Complete SignUp user", "email", auth.Email().String())
+	c.logger.Info("Complete SignUp user",
+		"email", auth.Email().String(),
+		"userId", userId.Value())
 	c.logger.Info("Finish Cognito SignUp")
 	return nil
 }
