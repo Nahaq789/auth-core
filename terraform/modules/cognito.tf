@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "main" {
-  name = "auth-core-pool"
+  name = "auth-core-dev-pool"
 
   # パスワードポリシー
   password_policy {
@@ -44,7 +44,7 @@ resource "aws_cognito_user_pool" "main" {
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-  name = "my-app-client"
+  name = "auth-core-dev-client"
 
   user_pool_id = aws_cognito_user_pool.main.id
 
