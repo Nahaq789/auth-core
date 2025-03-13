@@ -11,7 +11,7 @@ type UuidImpl struct {
 }
 
 func (u UuidImpl) NewV4() (string, error) {
-	return NewV4()
+	return newV4()
 }
 
 func NewUuid(uuid string) *UuidImpl {
@@ -34,7 +34,7 @@ func (uuid Uuid) String() string {
 	return string(buf)
 }
 
-func NewV4() (string, error) {
+func newV4() (string, error) {
 	var uuid Uuid
 
 	if _, err := io.ReadFull(rand.Reader, uuid[:]); err != nil {

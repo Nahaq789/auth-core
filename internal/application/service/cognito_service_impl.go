@@ -53,12 +53,7 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 	}
 
 	var uuidImpl uuid.UuidImpl
-	u, err := uuidImpl.NewV4()
-	if err != nil {
-		c.logger.Error("Failed generate uuid", "error", err)
-		return err
-	}
-	userId, err := user.NewUserId(uuid.NewUuid(u))
+	userId, err := user.NewUserId(uuidImpl)
 	if err != nil {
 		c.logger.Error("Failed generate userId", "error", err)
 		return err
