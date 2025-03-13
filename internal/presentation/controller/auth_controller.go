@@ -22,14 +22,8 @@ func (a *AuthController) Signup(c *gin.Context) {
 	var auth dto.AuthDto
 	if err := c.ShouldBind(&auth); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-	}
-
-	var user dto.UserDto
-	if err := c.ShouldBind(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"status": http.StatusBadRequest,
+			"error":  err.Error(),
 		})
 		return
 	}
@@ -38,13 +32,8 @@ func (a *AuthController) Signup(c *gin.Context) {
 	err := a.cognitoService.SignUp(ctx, &auth)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": err.Error(),
-		})
-	}
-	err = a.userService.CreateUser(context.Background(), &user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"status": http.StatusUnauthorized,
+			"error":  err.Error(),
 		})
 		return
 	}
@@ -53,4 +42,5 @@ func (a *AuthController) Signup(c *gin.Context) {
 		"status":  http.StatusOK,
 		"message": "user created",
 	})
+	return
 }
