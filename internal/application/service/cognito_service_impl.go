@@ -63,6 +63,10 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 	userType := user.NewUserType("standard")
 	time := time.Now()
 	user := user.NewUser(*userId, *result.Sub, *email, userType, time, time)
+	err = c.userService.CreateUser(ctx, user)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
 
 	c.logger.Info("Complete SignUp user",
 		"email", auth.Email().String(),
