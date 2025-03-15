@@ -70,7 +70,8 @@ func Routing(
 	v1 := r.Group("/api/v1")
 	v1.Use(middleware.LoggingMiddleware(&logger))
 	{
-		v1.POST("/signup", cr.AuthController.Signup)
+		v1.POST("/auth/signup", cr.AuthController.Signup)
+		v1.POST("/auth/verify", cr.AuthController.VerifyCode)
 	}
 
 	return nil
