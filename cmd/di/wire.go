@@ -22,7 +22,7 @@ func ProvideUserRepository(logger *slog.Logger, client *dynamodb.Client, aws *co
 }
 
 func ProvideCognitoRepository(client *cognitoidentityprovider.Client, aws *conf.AwsSetting) *repository.CognitoRepositoryImpl {
-	repository := repository.NewCognitoRepository(client, aws.CognitoClientId)
+	repository := repository.NewCognitoRepository(client, aws.CognitoClientId, aws.CognitoClientSecret)
 	return repository
 }
 
