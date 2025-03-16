@@ -47,6 +47,7 @@ resource "aws_cognito_user_pool_client" "client" {
   name = "auth-core-dev-client"
 
   user_pool_id = aws_cognito_user_pool.main.id
+  generate_secret = true
 
   # 認証フロー設定
   explicit_auth_flows = [
