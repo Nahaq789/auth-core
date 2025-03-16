@@ -16,9 +16,10 @@ type AppSetting struct {
 }
 
 type AwsSetting struct {
-	Region          string `env:"REGION"`
-	UserTable       string `env:"USER_TABLE"`
-	CognitoClientId string `env:"CLIENT_ID"`
+	Region              string `env:"REGION"`
+	UserTable           string `env:"USER_TABLE"`
+	CognitoClientId     string `env:"CLIENT_ID"`
+	CognitoClientSecret string `env:"CLIENT_SECRET"`
 }
 
 type AwsClient struct {
