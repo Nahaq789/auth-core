@@ -8,4 +8,5 @@ import (
 
 type CognitoRepository interface {
 	SignUp(ctx context.Context, user *auth.Auth) (*auth.SignUpResult, error)
+	VerifyCode(ctx context.Context, c *auth.VerifyCode) error
 }

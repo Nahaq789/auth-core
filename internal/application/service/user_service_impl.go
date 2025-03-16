@@ -20,7 +20,7 @@ func NewUserService(logger *slog.Logger, repository repository.UserRepository, c
 }
 
 func (us *UserServiceImpl) CreateUser(ctx context.Context, u *user.User) error {
-	us.logger.Info("Start Create User", "email", u.Email, "sub", u.Sub)
+	us.logger.Info("Start Create User", "email", u.Email(), "sub", u.Sub())
 
 	exist, err := us.repository.Exist(ctx, u.Email().Value())
 	if err != nil {

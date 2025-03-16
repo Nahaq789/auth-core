@@ -74,3 +74,13 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 	c.logger.Info("Finish Cognito SignUp")
 	return nil
 }
+
+func (c *CognitoServiceImpl) VerifyCode(ctx context.Context, code *dto.VerifyCodeDto) error {
+	verifyCode := auth.NewVerifyCode(code.Code)
+	if err := c.cognito.VerifyCode(ctx, verifyCode); err != nil {
+		c.logger.Error("Failed to verify code", "error", err)
+		return fmt.Errorf("failed to verify code: %w", err)
+	}
+
+	return nil
+}

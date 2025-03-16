@@ -38,14 +38,26 @@ func (actor *CognitoRepositoryImpl) SignUp(ctx context.Context, a *auth.Auth) (*
 		if errors.As(err, &invalidPassword) {
 			return nil, fmt.Errorf("%s", *invalidPassword.Message)
 		} else {
-			return nil, fmt.Errorf("Couldn't sign up user %v. message: %v\n", a.Email().String(), err)
+			return nil, fmt.Errorf("Couldn't sign up user %v. message: %w\n", a.Email().String(), err)
 		}
 	}
 
 	result, err := auth.NewSignUpResult(*output.UserSub)
 	if err != nil {
-		return nil, fmt.Errorf("%s", err)
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return *&result, err
+}
+
+func (actor *CognitoRepositoryImpl) VerifyCode(ctx context.Context, c *auth.VerifyCode) error {
+	output, err := actor.CognitoClient.VerifyUserAttribute(ctx, &cognitoidentityprovider.VerifyUserAttributeInput{
+		AttributeName: aws.String("email"),
+		Code:          aws.String(c.Code()),
+	})
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	fmt.Println(output)
+	return nil
 }
