@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
 
@@ -14,20 +17,24 @@ import (
 type CognitoRepositoryImpl struct {
 	CognitoClient *cognitoidentityprovider.Client
 	clientId      string
+	clientSecret  string
 }
 
-func NewCognitoRepository(client *cognitoidentityprovider.Client, clientId string) *CognitoRepositoryImpl {
+func NewCognitoRepository(client *cognitoidentityprovider.Client, clientId string, clientSecret string) *CognitoRepositoryImpl {
 	return &CognitoRepositoryImpl{
 		CognitoClient: client,
 		clientId:      clientId,
+		clientSecret:  clientSecret,
 	}
 }
 
 func (actor *CognitoRepositoryImpl) SignUp(ctx context.Context, a *auth.Auth) (*auth.SignUpResult, error) {
+	secretHash := actor.generateSecretHash(a.Email().Value())
 	output, err := actor.CognitoClient.SignUp(ctx, &cognitoidentityprovider.SignUpInput{
-		ClientId: aws.String(actor.clientId),
-		Password: aws.String(a.Password().String()),
-		Username: aws.String(a.Email().String()),
+		ClientId:   aws.String(actor.clientId),
+		Password:   aws.String(a.Password().String()),
+		Username:   aws.String(a.Email().String()),
+		SecretHash: &secretHash,
 		UserAttributes: []types.AttributeType{
 			{Name: aws.String("email"), Value: aws.String(a.Email().String())},
 		},
@@ -50,14 +57,25 @@ func (actor *CognitoRepositoryImpl) SignUp(ctx context.Context, a *auth.Auth) (*
 	return *&result, err
 }
 
-func (actor *CognitoRepositoryImpl) VerifyCode(ctx context.Context, c *auth.VerifyCode) error {
-	output, err := actor.CognitoClient.VerifyUserAttribute(ctx, &cognitoidentityprovider.VerifyUserAttributeInput{
-		AttributeName: aws.String("email"),
-		Code:          aws.String(c.Code()),
+func (actor *CognitoRepositoryImpl) ConfirmSignUp(ctx context.Context, c *auth.ConfirmSignUp) error {
+	secretHash := actor.generateSecretHash(c.UserName().Value())
+	code := c.Code()
+	userName := c.UserName().Value()
+	output, err := actor.CognitoClient.ConfirmSignUp(ctx, &cognitoidentityprovider.ConfirmSignUpInput{
+		ClientId:         &actor.clientId,
+		ConfirmationCode: &code,
+		Username:         &userName,
+		SecretHash:       &secretHash,
 	})
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
 	fmt.Println(output)
 	return nil
+}
+
+func (actor *CognitoRepositoryImpl) generateSecretHash(userName string) string {
+	mac := hmac.New(sha256.New, []byte(actor.clientSecret))
+	mac.Write([]byte(userName + actor.clientId))
+	return base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }
