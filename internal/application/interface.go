@@ -14,5 +14,5 @@ type UserService interface {
 
 type CognitoService interface {
 	SignUp(ctx context.Context, d *dto.AuthDto) error
-	VerifyCode(ctx context.Context, code *dto.VerifyCodeDto) error
+	ConfirmSignUp(ctx context.Context, code *dto.ConfirmSignUpDto) error
 }
