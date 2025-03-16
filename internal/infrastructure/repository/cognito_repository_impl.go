@@ -14,6 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 )
 
+var AuthFlowTypeUserSrpAuth = "USER_SRP_AUTH"
+
 type CognitoRepositoryImpl struct {
 	CognitoClient *cognitoidentityprovider.Client
 	clientId      string
@@ -45,7 +47,7 @@ func (actor *CognitoRepositoryImpl) SignUp(ctx context.Context, a *auth.Auth) (*
 		if errors.As(err, &invalidPassword) {
 			return nil, fmt.Errorf("%s", *invalidPassword.Message)
 		} else {
-			return nil, fmt.Errorf("Couldn't sign up user %v. message: %w\n", a.Email().String(), err)
+			return nil, fmt.Errorf("Failed to sign up user %v. message: %w\n", a.Email().String(), err)
 		}
 	}
 
@@ -71,6 +73,25 @@ func (actor *CognitoRepositoryImpl) ConfirmSignUp(ctx context.Context, c *auth.C
 		return fmt.Errorf("%w", err)
 	}
 	fmt.Println(output)
+	return nil
+}
+
+func (actor *CognitoRepositoryImpl) SignIn(ctx context.Context, s *auth.SignIn) error {
+	output, err := actor.CognitoClient.InitiateAuth(ctx, &cognitoidentityprovider.InitiateAuthInput{
+		AuthFlow:       types.AuthFlowType(AuthFlowTypeUserSrpAuth),
+		ClientId:       aws.String(actor.clientId),
+		AuthParameters: map[string]string{"USERNAME": s.Email().Value(), "SRP_A": s.Password().Value()},
+	})
+	if err != nil {
+		var invalidPassword *types.InvalidPasswordException
+		if errors.As(err, &invalidPassword) {
+			return fmt.Errorf("%s", *invalidPassword.Message)
+		} else {
+			return fmt.Errorf("Failed to signin user %v. message: %w\n", s.Email().String(), err)
+		}
+	}
+	fmt.Println(output)
+
 	return nil
 }
 
