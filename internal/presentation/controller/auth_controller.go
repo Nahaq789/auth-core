@@ -46,7 +46,7 @@ func (a *AuthController) Signup(c *gin.Context) {
 }
 
 func (a *AuthController) VerifyCode(c *gin.Context) {
-	var code *dto.VerifyCodeDto
+	var code *dto.ConfirmSignUpDto
 	if err := c.ShouldBind(&code); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
@@ -55,7 +55,7 @@ func (a *AuthController) VerifyCode(c *gin.Context) {
 		return
 	}
 	ctx := context.Background()
-	err := a.cognitoService.VerifyCode(ctx, code)
+	err := a.cognitoService.ConfirmSignUp(ctx, code)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status": http.StatusUnauthorized,
