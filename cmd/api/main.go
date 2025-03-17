@@ -71,7 +71,7 @@ func Routing(
 	v1.Use(middleware.LoggingMiddleware(&logger))
 	{
 		v1.POST("/auth/signup", cr.AuthController.Signup)
-		v1.POST("/auth/verify", cr.AuthController.VerifyCode)
+		v1.POST("/auth/confirm", cr.AuthController.ConfirmSignUp)
 	}
 
 	return nil

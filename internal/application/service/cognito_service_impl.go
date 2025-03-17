@@ -29,7 +29,7 @@ func NewCognitoService(
 	return &CognitoServiceImpl{logger: logger, userService: userService, cognito: cognito}
 }
 
-func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
+func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.SignUpDto) error {
 	c.logger.Info("Start Cognito SignUp", "email", d.Email)
 
 	email, err := valueObjects.NewEmail(d.Email)
@@ -39,7 +39,7 @@ func (c *CognitoServiceImpl) SignUp(ctx context.Context, d *dto.AuthDto) error {
 	}
 	password := valueObjects.NewPassword(d.Password)
 
-	auth := auth.NewAuth(
+	auth := auth.NewSignUp(
 		*email,
 		*password,
 	)
@@ -81,6 +81,8 @@ func (c *CognitoServiceImpl) ConfirmSignUp(ctx context.Context, confirm *dto.Con
 		c.logger.Error("Failed to email",
 			"email", email,
 			"error", err)
+		return fmt.Errorf("invalid email format %q: %w", confirm.Email, err)
+
 	}
 	verifyCode := auth.NewConfirmSignUp(*email, confirm.Code)
 	if err := c.cognito.ConfirmSignUp(ctx, verifyCode); err != nil {
@@ -88,5 +90,17 @@ func (c *CognitoServiceImpl) ConfirmSignUp(ctx context.Context, confirm *dto.Con
 		return fmt.Errorf("failed to verify code: %w", err)
 	}
 
+	return nil
+}
+
+func (c *CognitoServiceImpl) SignIn(ctx context.Context, d *dto.SignInDto) error {
+	email, err := valueObjects.NewEmail(d.Email())
+	if err != nil {
+		c.logger.Error("Failed email validation", "email", d.Email(), "error", err)
+		return fmt.Errorf("invalid email format %q: %w", d.Email(), err)
+	}
+
+	signin := auth.NewSignIn(*email, d.SrpA())
+	res := c.cognito.SignIn(ctx, signin)
 	return nil
 }

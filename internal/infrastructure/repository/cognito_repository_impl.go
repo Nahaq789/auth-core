@@ -30,7 +30,7 @@ func NewCognitoRepository(client *cognitoidentityprovider.Client, clientId strin
 	}
 }
 
-func (actor *CognitoRepositoryImpl) SignUp(ctx context.Context, a *auth.Auth) (*auth.SignUpResult, error) {
+func (actor *CognitoRepositoryImpl) SignUp(ctx context.Context, a *auth.SignUp) (*auth.SignUpResult, error) {
 	secretHash := actor.generateSecretHash(a.Email().Value())
 	output, err := actor.CognitoClient.SignUp(ctx, &cognitoidentityprovider.SignUpInput{
 		ClientId:   aws.String(actor.clientId),
@@ -80,7 +80,7 @@ func (actor *CognitoRepositoryImpl) SignIn(ctx context.Context, s *auth.SignIn) 
 	output, err := actor.CognitoClient.InitiateAuth(ctx, &cognitoidentityprovider.InitiateAuthInput{
 		AuthFlow:       types.AuthFlowType(AuthFlowTypeUserSrpAuth),
 		ClientId:       aws.String(actor.clientId),
-		AuthParameters: map[string]string{"USERNAME": s.Email().Value(), "SRP_A": s.Password().Value()},
+		AuthParameters: map[string]string{"USERNAME": s.Email().Value(), "SRP_A": s.SrpA()},
 	})
 	if err != nil {
 		var invalidPassword *types.InvalidPasswordException

@@ -19,7 +19,7 @@ func NewAuthController(s application.UserService, c application.CognitoService) 
 }
 
 func (a *AuthController) Signup(c *gin.Context) {
-	var auth dto.AuthDto
+	var auth dto.SignUpDto
 	if err := c.ShouldBind(&auth); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": http.StatusBadRequest,
@@ -45,7 +45,7 @@ func (a *AuthController) Signup(c *gin.Context) {
 	return
 }
 
-func (a *AuthController) VerifyCode(c *gin.Context) {
+func (a *AuthController) ConfirmSignUp(c *gin.Context) {
 	var code *dto.ConfirmSignUpDto
 	if err := c.ShouldBind(&code); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
