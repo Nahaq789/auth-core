@@ -103,6 +103,17 @@ func (actor *CognitoRepositoryImpl) InitiateAuth(ctx context.Context, s *auth.Cr
 	return challengeResponse, nil
 }
 
+func (actor *CognitoRepositoryImpl) AuthChallenge(ctx context.Context, a *auth.AuthChallenge) error {
+	output, err := actor.CognitoClient.RespondToAuthChallenge(ctx, &cognitoidentityprovider.RespondToAuthChallengeInput{
+		ChallengeName:      types.ChallengeNameType(a.ChallengeName()),
+		ClientId:           aws.String(actor.clientId),
+		ChallengeResponses: a.ChallengeResponse(),
+	})
+
+	fmt.Println(output)
+	return err
+}
+
 func (actor *CognitoRepositoryImpl) generateSecretHash(userName string) string {
 	mac := hmac.New(sha256.New, []byte(actor.clientSecret))
 	mac.Write([]byte(userName + actor.clientId))
