@@ -93,14 +93,25 @@ func (c *CognitoServiceImpl) ConfirmSignUp(ctx context.Context, confirm *dto.Con
 	return nil
 }
 
-func (c *CognitoServiceImpl) SignIn(ctx context.Context, d *dto.SignInDto) error {
-	email, err := valueObjects.NewEmail(d.Email())
+func (c *CognitoServiceImpl) SignIn(ctx context.Context, d *dto.SignInDto) (*dto.ChallengeResponseDto, error) {
+	email, err := valueObjects.NewEmail(d.Email)
 	if err != nil {
-		c.logger.Error("Failed email validation", "email", d.Email(), "error", err)
-		return fmt.Errorf("invalid email format %q: %w", d.Email(), err)
+		c.logger.Error("Failed email validation", "email", d.Email, "error", err)
+		return nil, fmt.Errorf("invalid email format %q: %w", d.Email, err)
 	}
 
-	signin := auth.NewSignIn(*email, d.SrpA())
-	res := c.cognito.SignIn(ctx, signin)
-	return nil
+	signin := auth.NewCredentials(*email, d.SrpA)
+	challenge, err := c.cognito.InitiateAuth(ctx, signin)
+	if err != nil {
+		c.logger.Error("Failed to Signin", "error", err)
+		return nil, fmt.Errorf("failed to signin: %w", err)
+	}
+
+	return &dto.ChallengeResponseDto{
+		ChallengeName: challenge.GetChallengeName(),
+		SrpB:          challenge.GetSrpB(),
+		Salt:          challenge.GetSalt(),
+		SecretBlock:   challenge.GetSecretBlock(),
+		UserIdForSrp:  challenge.GetUserIdForSrp(),
+	}, nil
 }

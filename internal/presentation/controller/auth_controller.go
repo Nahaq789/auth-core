@@ -69,3 +69,24 @@ func (a *AuthController) ConfirmSignUp(c *gin.Context) {
 		"message": "verify code success",
 	})
 }
+
+func (a *AuthController) SignIn(c *gin.Context) {
+	var credential *dto.SignInDto
+	if err := c.ShouldBind(&credential); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"error":  err.Error(),
+		})
+		return
+	}
+	ctx := context.Background()
+	res, err := a.cognitoService.SignIn(ctx, credential)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": http.StatusUnauthorized,
+			"error":  err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}

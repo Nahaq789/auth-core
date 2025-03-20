@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/auth-core/internal/domain/models/auth"
+	valueObjects "github.com/auth-core/internal/domain/value_objects"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
@@ -76,23 +77,30 @@ func (actor *CognitoRepositoryImpl) ConfirmSignUp(ctx context.Context, c *auth.C
 	return nil
 }
 
-func (actor *CognitoRepositoryImpl) SignIn(ctx context.Context, s *auth.SignIn) error {
+func (actor *CognitoRepositoryImpl) InitiateAuth(ctx context.Context, s *auth.Credentials) (*valueObjects.AuthenticationChallenge, error) {
+	secretHash := actor.generateSecretHash(s.Email().Value())
 	output, err := actor.CognitoClient.InitiateAuth(ctx, &cognitoidentityprovider.InitiateAuthInput{
 		AuthFlow:       types.AuthFlowType(AuthFlowTypeUserSrpAuth),
 		ClientId:       aws.String(actor.clientId),
-		AuthParameters: map[string]string{"USERNAME": s.Email().Value(), "SRP_A": s.SrpA()},
+		AuthParameters: map[string]string{"USERNAME": s.Email().Value(), "SRP_A": s.SrpA(), "SECRET_HASH": secretHash},
 	})
 	if err != nil {
 		var invalidPassword *types.InvalidPasswordException
 		if errors.As(err, &invalidPassword) {
-			return fmt.Errorf("%s", *invalidPassword.Message)
+			return nil, fmt.Errorf("%s", *invalidPassword.Message)
 		} else {
-			return fmt.Errorf("Failed to signin user %v. message: %w\n", s.Email().String(), err)
+			return nil, fmt.Errorf("Failed to initiate auth %v. message: %w\n", s.Email().String(), err)
 		}
 	}
-	fmt.Println(output)
+	challengeResponse, err := valueObjects.NewAuthenticationChallenge(
+		string(types.ChallengeNameTypePasswordVerifier),
+		output.ChallengeParameters,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to initiate auth. message: %w\n", err)
+	}
 
-	return nil
+	return challengeResponse, nil
 }
 
 func (actor *CognitoRepositoryImpl) generateSecretHash(userName string) string {

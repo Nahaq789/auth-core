@@ -2,19 +2,19 @@ package auth
 
 import valueObjects "github.com/auth-core/internal/domain/value_objects"
 
-type SignIn struct {
+type Credentials struct {
 	email valueObjects.Email
 	srpA  string
 }
 
-func NewSignIn(email valueObjects.Email, password string) *SignIn {
-	return &SignIn{email: email, srpA: password}
+func NewCredentials(email valueObjects.Email, password string) *Credentials {
+	return &Credentials{email: email, srpA: password}
 }
 
-func (s *SignIn) Email() valueObjects.Email {
+func (s *Credentials) Email() valueObjects.Email {
 	return s.email
 }
 
-func (s *SignIn) SrpA() string {
+func (s *Credentials) SrpA() string {
 	return s.srpA
 }

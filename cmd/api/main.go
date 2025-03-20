@@ -72,6 +72,7 @@ func Routing(
 	{
 		v1.POST("/auth/signup", cr.AuthController.Signup)
 		v1.POST("/auth/confirm", cr.AuthController.ConfirmSignUp)
+		v1.POST("/auth/signin", cr.AuthController.SignIn)
 	}
 
 	return nil

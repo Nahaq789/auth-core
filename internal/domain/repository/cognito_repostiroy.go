@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"github.com/auth-core/internal/domain/models/auth"
+	valueObjects "github.com/auth-core/internal/domain/value_objects"
 )
 
 type CognitoRepository interface {
 	SignUp(ctx context.Context, user *auth.SignUp) (*auth.SignUpResult, error)
 	ConfirmSignUp(ctx context.Context, c *auth.ConfirmSignUp) error
-	SignIn(ctx context.Context, s *auth.SignIn) error
+	InitiateAuth(ctx context.Context, s *auth.Credentials) (*valueObjects.AuthenticationChallenge, error)
 }
