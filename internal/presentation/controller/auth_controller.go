@@ -80,7 +80,7 @@ func (a *AuthController) SignIn(c *gin.Context) {
 		return
 	}
 	ctx := context.Background()
-	res, err := a.cognitoService.SignIn(ctx, credential)
+	res, err := a.cognitoService.InitiateAuth(ctx, credential)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"status": http.StatusUnauthorized,
