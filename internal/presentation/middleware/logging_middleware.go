@@ -15,7 +15,7 @@ var (
 
 func LoggingMiddleware(config *logger.LoggerConfig) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		jst, err := time.LoadLocation("Asia/Tokyo")
+		jst, err := time.LoadLocation("Local")
 		if err != nil {
 			config.Logger.Error("Failed to load location for Asia/Tokyo", "error", err)
 		}
