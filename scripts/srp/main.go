@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -64,6 +65,22 @@ func main() {
 
 	if resp.ChallengeName == types.ChallengeNameTypePasswordVerifier {
 		challengeResponse, _ := csrp.PasswordVerifierChallenge(resp.ChallengeParameters, time.Now())
+
+		jsonOutput := map[string]string{
+			"time_stamp":   challengeResponse["TIMESTAMP"],
+			"email":        challengeResponse["USERNAME"],
+			"secret_block": challengeResponse["PASSWORD_CLAIM_SECRET_BLOCK"],
+			"signature":    challengeResponse["PASSWORD_CLAIM_SIGNATURE"],
+		}
+
+		jsonBytes, err := json.MarshalIndent(jsonOutput, "", "  ")
+		if err != nil {
+			fmt.Println("failed to parse to json:", err)
+		} else {
+			fmt.Println()
+			fmt.Println("=== Challenge Response (JSON) ===")
+			fmt.Println(string(jsonBytes))
+		}
 
 		resp, err := client.RespondToAuthChallenge(ctx, &cognitoidentityprovider.RespondToAuthChallengeInput{
 			ChallengeName:      types.ChallengeNameTypePasswordVerifier,
