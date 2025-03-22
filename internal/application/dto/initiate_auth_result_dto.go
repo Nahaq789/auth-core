@@ -1,6 +1,6 @@
 package dto
 
-type ChallengeResponseDto struct {
+type InitiateAuthResultDto struct {
 	ChallengeName string
 	SrpB          string
 	Salt          string

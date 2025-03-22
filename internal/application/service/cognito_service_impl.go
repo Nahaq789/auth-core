@@ -93,7 +93,7 @@ func (c *CognitoServiceImpl) ConfirmSignUp(ctx context.Context, confirm *dto.Con
 	return nil
 }
 
-func (c *CognitoServiceImpl) SignIn(ctx context.Context, d *dto.SignInDto) (*dto.ChallengeResponseDto, error) {
+func (c *CognitoServiceImpl) SignIn(ctx context.Context, d *dto.SignInDto) (*dto.InitiateAuthResultDto, error) {
 	email, err := valueObjects.NewEmail(d.Email)
 	if err != nil {
 		c.logger.Error("Failed email validation", "email", d.Email, "error", err)
@@ -107,7 +107,7 @@ func (c *CognitoServiceImpl) SignIn(ctx context.Context, d *dto.SignInDto) (*dto
 		return nil, fmt.Errorf("failed to signin: %w", err)
 	}
 
-	return &dto.ChallengeResponseDto{
+	return &dto.InitiateAuthResultDto{
 		ChallengeName: challenge.GetChallengeName(),
 		SrpB:          challenge.GetSrpB(),
 		Salt:          challenge.GetSalt(),
