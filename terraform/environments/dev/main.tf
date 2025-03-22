@@ -7,6 +7,7 @@ module "lambda" {
         user_table = var.user_table
         client_id = var.client_id
         client_secret = var.client_secret
+        dynamodb_table_arns = module.dynamodb.table_arns
 }
 
 module "dynamodb" {

@@ -1,3 +1,8 @@
+variable "dynamodb_table_arns" {
+  description = "ARNs of DynamoDB tables"
+  type        = map(string)
+}
+
 variable "user_table" {
   description = "dynamodb user table"
   type        = string
@@ -31,9 +36,40 @@ resource "aws_iam_role" "lambda" {
   })
 }
 
+resource "aws_iam_policy" "lambda_dynamodb" {
+  name        = "${var.env}-${var.project_name}-lambda-dynamodb-policy"
+  description = "Allow Lambda to access DynamoDB tables"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = [
+          values(var.dynamodb_table_arns)[0],
+          "${values(var.dynamodb_table_arns)[0]}/index/email-index"
+        ] 
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_basic" {
   role       = aws_iam_role.lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb" {
+  role       = aws_iam_role.lambda.name
+  policy_arn = aws_iam_policy.lambda_dynamodb.arn
 }
 
 resource "aws_lambda_function" "app" {
