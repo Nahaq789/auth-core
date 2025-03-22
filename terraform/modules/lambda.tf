@@ -1,3 +1,19 @@
+variable "user_table" {
+  description = "dynamodb user table"
+  type        = string
+}
+
+variable "client_id" {
+  description = "Client ID for cognito"
+  type        = string
+}
+
+variable "client_secret" {
+  description = "Client secret for cognito"
+  type        = string
+  sensitive   = true 
+}
+
 resource "aws_iam_role" "lambda" {
   name = "${var.env}-${var.project_name}-lambda-role"
 
@@ -33,6 +49,9 @@ resource "aws_lambda_function" "app" {
     variables = {
       ENVIRONMENT = var.env
       PORT = "8080"
+      USER_TABLE = var.user_table
+      CLIENT_ID = var.client_id
+      CLIENT_SECRET = var.client_secret
     }
   }
 }
