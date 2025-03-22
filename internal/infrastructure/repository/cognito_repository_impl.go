@@ -92,7 +92,7 @@ func (actor *CognitoRepositoryImpl) InitiateAuth(ctx context.Context, s *auth.Cr
 			return nil, fmt.Errorf("Failed to initiate auth %v. message: %w\n", s.Email().String(), err)
 		}
 	}
-	challengeResponse, err := valueObjects.NewAuthenticationChallenge(
+	response, err := valueObjects.NewAuthenticationChallenge(
 		string(types.ChallengeNameTypePasswordVerifier),
 		output.ChallengeParameters,
 	)
@@ -100,18 +100,27 @@ func (actor *CognitoRepositoryImpl) InitiateAuth(ctx context.Context, s *auth.Cr
 		return nil, fmt.Errorf("Failed to initiate auth. message: %w\n", err)
 	}
 
-	return challengeResponse, nil
+	return response, nil
 }
 
-func (actor *CognitoRepositoryImpl) AuthChallenge(ctx context.Context, a *auth.AuthChallenge) error {
+func (actor *CognitoRepositoryImpl) AuthChallenge(ctx context.Context, a *auth.AuthChallenge) (*valueObjects.Token, error) {
+	secretHash := actor.generateSecretHash(a.Email().Value())
+	a.SetSecretHash(secretHash)
 	output, err := actor.CognitoClient.RespondToAuthChallenge(ctx, &cognitoidentityprovider.RespondToAuthChallengeInput{
 		ChallengeName:      types.ChallengeNameType(a.ChallengeName()),
 		ClientId:           aws.String(actor.clientId),
 		ChallengeResponses: a.ChallengeResponse(),
 	})
+	if err != nil {
+		return nil, fmt.Errorf("Failed to Auth challenge. message: %w", err)
+	}
 
-	fmt.Println(output)
-	return err
+	token, err := valueObjects.NewToken(
+		*output.AuthenticationResult.AccessToken, *output.AuthenticationResult.IdToken, *output.AuthenticationResult.RefreshToken)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+	return token, nil
 }
 
 func (actor *CognitoRepositoryImpl) generateSecretHash(userName string) string {

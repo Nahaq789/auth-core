@@ -70,7 +70,7 @@ func (a *AuthController) ConfirmSignUp(c *gin.Context) {
 	})
 }
 
-func (a *AuthController) SignIn(c *gin.Context) {
+func (a *AuthController) InitiateAuth(c *gin.Context) {
 	var credential *dto.SignInDto
 	if err := c.ShouldBind(&credential); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -89,4 +89,26 @@ func (a *AuthController) SignIn(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, res)
+}
+
+func (a *AuthController) AuthChallenge(c *gin.Context) {
+	var challenge *dto.AuthChallengeDto
+	if err := c.ShouldBind(&challenge); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": http.StatusBadRequest,
+			"error":  err.Error(),
+		})
+		return
+	}
+
+	ctx := context.Background()
+	result, err := a.cognitoService.AuthChallenge(ctx, challenge)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": http.StatusUnauthorized,
+			"error":  err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }

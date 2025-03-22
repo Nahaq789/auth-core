@@ -66,14 +66,14 @@ func main() {
 	if resp.ChallengeName == types.ChallengeNameTypePasswordVerifier {
 		challengeResponse, _ := csrp.PasswordVerifierChallenge(resp.ChallengeParameters, time.Now())
 
-		jsonOutput := map[string]string{
+		authChallengeOutput := map[string]string{
 			"time_stamp":   challengeResponse["TIMESTAMP"],
 			"email":        challengeResponse["USERNAME"],
 			"secret_block": challengeResponse["PASSWORD_CLAIM_SECRET_BLOCK"],
 			"signature":    challengeResponse["PASSWORD_CLAIM_SIGNATURE"],
 		}
 
-		jsonBytes, err := json.MarshalIndent(jsonOutput, "", "  ")
+		jsonBytes, err := json.MarshalIndent(authChallengeOutput, "", "  ")
 		if err != nil {
 			fmt.Println("failed to parse to json:", err)
 		} else {

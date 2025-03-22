@@ -26,3 +26,15 @@ func validateToken(a string, i string, r string) error {
 	}
 	return nil
 }
+
+func (t *Token) AccessToken() string {
+	return t.accessToken
+}
+
+func (t *Token) IdToken() string {
+	return t.idToken
+}
+
+func (t *Token) RefreshToken() string {
+	return t.refreshToken
+}

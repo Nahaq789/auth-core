@@ -86,8 +86,8 @@ func (c *CognitoServiceImpl) ConfirmSignUp(ctx context.Context, confirm *dto.Con
 	}
 	verifyCode := auth.NewConfirmSignUp(*email, confirm.Code)
 	if err := c.cognito.ConfirmSignUp(ctx, verifyCode); err != nil {
-		c.logger.Error("Failed to verify code", "error", err)
-		return fmt.Errorf("failed to verify code: %w", err)
+		c.logger.Error("Failed to ConfirmSignUp", "error", err)
+		return fmt.Errorf("failed to confirm signup: %w", err)
 	}
 
 	return nil
@@ -103,8 +103,8 @@ func (c *CognitoServiceImpl) InitiateAuth(ctx context.Context, d *dto.SignInDto)
 	signin := auth.NewCredentials(*email, d.SrpA)
 	challenge, err := c.cognito.InitiateAuth(ctx, signin)
 	if err != nil {
-		c.logger.Error("Failed to Signin", "error", err)
-		return nil, fmt.Errorf("failed to signin: %w", err)
+		c.logger.Error("Failed to InitiateAuth", "error", err)
+		return nil, fmt.Errorf("failed to initiate auth: %w", err)
 	}
 
 	return &dto.InitiateAuthResultDto{
@@ -113,5 +113,26 @@ func (c *CognitoServiceImpl) InitiateAuth(ctx context.Context, d *dto.SignInDto)
 		Salt:          challenge.GetSalt(),
 		SecretBlock:   challenge.GetSecretBlock(),
 		UserIdForSrp:  challenge.GetUserIdForSrp(),
+	}, nil
+}
+
+func (c *CognitoServiceImpl) AuthChallenge(ctx context.Context, d *dto.AuthChallengeDto) (*dto.AuthChallengeResultDto, error) {
+	email, err := valueObjects.NewEmail(d.Email)
+	if err != nil {
+		c.logger.Error("Failed email validation", "email", d.Email, "error", err)
+		return nil, fmt.Errorf("invalid email format %q: %w", d.Email, err)
+	}
+	challenge := auth.NewAuthChallenge(d.TimeStamp, *email, d.SecretBlock, d.Signature)
+
+	token, err := c.cognito.AuthChallenge(ctx, challenge)
+	if err != nil {
+		c.logger.Error("Failed to AuthChallenge", "error", err)
+		return nil, fmt.Errorf("failed to auth challenge: %w", err)
+	}
+	fmt.Println(token)
+	return &dto.AuthChallengeResultDto{
+		AccessToken:  token.AccessToken(),
+		IdToken:      token.IdToken(),
+		RefreshToken: token.RefreshToken(),
 	}, nil
 }
