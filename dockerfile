@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN GOOS=linux CGO_ENABLED=0 go build -o bootstrap ./cmd/server
+RUN GOOS=linux CGO_ENABLED=0 go build -o bootstrap ./cmd/api
 FROM alpine:3.9 
 RUN apk add ca-certificates
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.0 /lambda-adapter /opt/extensions/lambda-adapter
