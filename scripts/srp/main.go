@@ -1,10 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"time"
 
 	cognitosrp "github.com/alexrudd/cognito-srp/v4"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 	"github.com/joho/godotenv"
 )
 
@@ -43,5 +49,37 @@ func main() {
 	fmt.Println("\n=== SRP_A Value Only (For Copy/Paste) ===")
 	fmt.Println(authParams["SRP_A"])
 
+	ctx := context.Background()
+	sdkConfig, _ := config.LoadDefaultConfig(ctx)
+	client := cognitoidentityprovider.NewFromConfig(sdkConfig)
+
+	resp, err := client.InitiateAuth(ctx, &cognitoidentityprovider.InitiateAuthInput{
+		AuthFlow:       types.AuthFlowTypeUserSrpAuth,
+		ClientId:       aws.String(csrp.GetClientId()),
+		AuthParameters: authParams,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.ChallengeName == types.ChallengeNameTypePasswordVerifier {
+		challengeResponse, _ := csrp.PasswordVerifierChallenge(resp.ChallengeParameters, time.Now())
+
+		resp, err := client.RespondToAuthChallenge(ctx, &cognitoidentityprovider.RespondToAuthChallengeInput{
+			ChallengeName:      types.ChallengeNameTypePasswordVerifier,
+			ChallengeResponses: challengeResponse,
+			ClientId:           aws.String(csrp.GetClientId()),
+		})
+
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println()
+		fmt.Println("=== Tokens ===")
+		fmt.Printf("Access Token: %s\n", *resp.AuthenticationResult.AccessToken)
+		fmt.Printf("ID Token: %s\n", *resp.AuthenticationResult.IdToken)
+		fmt.Printf("Refresh Token: %s\n", *resp.AuthenticationResult.RefreshToken)
+	}
 	return
 }
