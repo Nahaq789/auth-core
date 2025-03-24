@@ -52,12 +52,12 @@ var userRepositorySet = wire.NewSet(
 )
 
 var cognitoRepositorySet = wire.NewSet(
-	ProvideCognitoRepository, wire.Bind(new(repository2.CognitoRepository), new(*repository.CognitoRepositoryImpl)),
+	ProvideCognitoRepository, wire.Bind(new(repository2.AuthRepository), new(*repository.CognitoRepositoryImpl)),
 )
 
 var userServiceSet = wire.NewSet(services.NewUserService, wire.Bind(new(application.UserService), new(*services.UserServiceImpl)))
 
-var cognitoServiceSet = wire.NewSet(services.NewCognitoService, wire.Bind(new(application.CognitoService), new(*services.CognitoServiceImpl)))
+var cognitoServiceSet = wire.NewSet(services.NewCognitoService, wire.Bind(new(application.AuthService), new(*services.CognitoServiceImpl)))
 
 var controllerSet = wire.NewSet(controller.NewAuthController)
 

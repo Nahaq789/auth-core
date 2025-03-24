@@ -11,10 +11,10 @@ import (
 
 type AuthController struct {
 	userService    application.UserService
-	cognitoService application.CognitoService
+	cognitoService application.AuthService
 }
 
-func NewAuthController(s application.UserService, c application.CognitoService) *AuthController {
+func NewAuthController(s application.UserService, c application.AuthService) *AuthController {
 	return &AuthController{userService: s, cognitoService: c}
 }
 

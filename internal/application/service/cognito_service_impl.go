@@ -18,13 +18,13 @@ import (
 type CognitoServiceImpl struct {
 	logger      *slog.Logger
 	userService application.UserService
-	cognito     repository.CognitoRepository
+	cognito     repository.AuthRepository
 }
 
 func NewCognitoService(
 	logger *slog.Logger,
 	userService application.UserService,
-	cognito repository.CognitoRepository,
+	cognito repository.AuthRepository,
 ) *CognitoServiceImpl {
 	return &CognitoServiceImpl{logger: logger, userService: userService, cognito: cognito}
 }

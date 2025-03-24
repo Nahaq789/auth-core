@@ -12,10 +12,10 @@ import (
 type UserServiceImpl struct {
 	logger     *slog.Logger
 	repository repository.UserRepository
-	cognito    repository.CognitoRepository
+	cognito    repository.AuthRepository
 }
 
-func NewUserService(logger *slog.Logger, repository repository.UserRepository, cognito repository.CognitoRepository) *UserServiceImpl {
+func NewUserService(logger *slog.Logger, repository repository.UserRepository, cognito repository.AuthRepository) *UserServiceImpl {
 	return &UserServiceImpl{logger: logger, repository: repository, cognito: cognito}
 }
 
